@@ -12,37 +12,53 @@ import java.util.Date;
 
 @Service
 public class JwtService {
-        private SecretKey getSecretKey() {
-                return Keys.hmacShaKeyFor(SECRET.getBytes());
-        }
-        private static final String SECRET = "mysecretsupersecuremysecretsupersecure";
-        public String generateToken(UserDetails user){
+    private SecretKey getSecretKey() {
+        return Keys.hmacShaKeyFor(SECRET.getBytes());
+    }
 
-                return Jwts.builder()
-                        .subject(user.getUsername())
-                        .claim("roles", user.getAuthorities())
-                        .issuedAt(new Date())
-                        .expiration(new Date(System.currentTimeMillis()+86400000))
-                        .signWith(getSecretKey())
-                        .compact();
-        }
-        public Claims verifyToken(String token) {
-                return Jwts.parser()
-                        .verifyWith(getSecretKey())
-                        .build()
-                        .parseSignedClaims(token)
-                        .getPayload();
-        }
+    private static final String SECRET = "mysecretsupersecuremysecretsupersecure";
 
-        public String extractUsername(String token) {
-                return verifyToken(token).getSubject();
-        }
-        public Date getExpiration(String token) {
-                return verifyToken(token).getExpiration();
-        }
-        public boolean isTokenExpired(String token) {
-            return getExpiration(token).before(new Date());
-        }
+    public String generateAccessToken(UserDetails user) {
+
+        return Jwts.builder()
+                .subject(user.getUsername())
+                .claim("roles", user.getAuthorities())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5))
+                .signWith(getSecretKey())
+                .compact();
+    }
+
+    public String generateRefreshToken(UserDetails user) {
+
+        return Jwts.builder()
+                .subject(user.getUsername())
+                .claim("roles", user.getAuthorities())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7))
+                .signWith(getSecretKey())
+                .compact();
+    }
+
+    public Claims verifyToken(String token) {
+        return Jwts.parser()
+                .verifyWith(getSecretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public String extractUsername(String token) {
+        return verifyToken(token).getSubject();
+    }
+
+    public Date getExpiration(String token) {
+        return verifyToken(token).getExpiration();
+    }
+
+    public boolean isTokenExpired(String token) {
+        return getExpiration(token).before(new Date());
+    }
 
 
 }
