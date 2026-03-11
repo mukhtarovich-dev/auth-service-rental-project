@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
      private final AuthenticationManager authenticationManager;
